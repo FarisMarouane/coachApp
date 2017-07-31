@@ -2,8 +2,22 @@ var express=require("express");
 var bodyParser=require("body-parser");
 var methodOverride = require('method-override');
 var mongoose=require("mongoose");
+var passport=require("passport");
+var localStrategy=require("passport-local");
+var passportLocalMongoose=require("passport-local-mongoose");
 
 var app=express();
+
+// session
+app.use(require("express-session"){
+	secret:"I am a boss", 
+	resave:false,
+	saveUnitialized:false}));
+})
+
+// passport auth stuff
+app.use(passport.initialize());
+app.use(passport.session());
 
 mongoose.connect("mongodb://localhost/coach_app");
 app.set("view engine", "ejs");

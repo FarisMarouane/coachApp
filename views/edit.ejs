@@ -1,0 +1,46 @@
+<% include ./partials/header %>
+
+<div class="container">
+  <h1 class="text-center">Modifiez votre profil</h1>
+
+    <div >
+        <!-- <form action="/coaches" method="POST" class="form" enctype="multipart/form-data"> -->
+        <form action="/coaches/<%=coach._id%>?_method=PUT" method="POST" class="form">
+            <div class="form-group">
+                <label>Nom:</label>
+                <input type="text" name="coach[nom]" value="<%=coach.nom%>" class="form-control">
+            </div>
+          <div class="form-group">
+            <label>Prénom:</label>
+            <input type="text" name="coach[prenom]" value="<%=coach.prenom%>" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Email:</label>
+            <input type="email" name="coach[email]" value="<%=coach.email%>" class="form-control">
+          </div>
+          <!-- <div class="form-group">
+            <label>Photo de Profil:</label>
+            <input type="file" name="coach[photo]" accept="image/*" placeholder="Lien Photo"class="form-control">
+          </div> -->
+          <div class="form-group">
+            <label>Photo de Profil:</label>
+            <input type="text" name="coach[photo]"  value="<%=coach.photo%>"class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Description:</label>
+            <textarea name="coach[description]" value="<%=coach.description%>"class="form-control"></textarea>      
+          </div>
+          <div class="form-group">
+            <label>Nouveau mot de passe:</label>
+            <input type="password" name="coach[password]"  class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Confirmez votre mot nouveau mot de passe:</label>
+            <input type="password" name="passwordBis" placeholder="Saisissez votre mot de passe à nouveau" class="form-control">
+          </div>
+          <button class="text-center btn btn-success pull-right" type="submit">Modifiez</button>
+      </form>
+    </div>    
+</div>
+
+<<% include ./partials/footer %>

@@ -1,0 +1,48 @@
+<% include ./partials/header %>
+
+
+<div class="container">
+  <h1 class="text-center">Ajouter votre profil de coach</h1>
+
+    <div >
+        <!-- <form action="/coaches" method="POST" class="form" enctype="multipart/form-data"> -->
+        <form action="/coaches" method="POST" class="form">
+            <div class="form-group">
+                <label>Nom:</label>
+                <input type="text" name="nom" placeholder="Nom" class="form-control">
+            </div>
+          <div class="form-group">
+            <label>Prénom:</label>
+            <input type="text" name="prenom" placeholder="Prénom" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Email:</label>
+            <input type="email" name="email" placeholder="Adresse email" class="form-control">
+          </div>
+          <!-- <div class="form-group">
+            <label>Photo de Profil:</label>
+            <input type="file" name="coach[photo]" accept="image/*" placeholder="Lien Photo"class="form-control">
+          </div> -->
+          <div class="form-group">
+            <label>Photo de Profil:</label>
+            <input type="text" name="photo"  placeholder="Lien Photo"class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Description:</label>
+            <textarea name="description" placeholder="Description"class="form-control"></textarea>      
+          </div>
+          <div class="form-group">
+            <label>Mot de passe:</label>
+            <input type="password" name="password" placeholder="Saisissez votre mot de passe" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Confirmez votre mot de passe:</label>
+            <input type="password" name="passwordBis" placeholder="Saisissez votre mot de passe à nouveau" class="form-control">
+          </div>
+          <button class="text-center btn btn-success pull-right" type="submit">Validez</button>
+      </form>
+    </div>    
+</div>
+	
+
+<% include ./partials/footer %>

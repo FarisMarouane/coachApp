@@ -1,0 +1,22 @@
+<% include ./partials/header %>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-6 col-sm-8">
+					<div  class="thumbnail">
+							<img id="coach-img" class="img-responsive img-circle" src="<%=coach.photo%>">
+							<div class="caption text-center">
+                    			<p><%=coach.nom%></p>
+								<p class="text-justify	"><%=coach.description%></p>													
+                			</div>	
+                			<a class="btn btn-warning" href="/coaches/<%=coach._id%>/edit">Modifier</a>
+
+                			<form action="/coaches/<%=coach._id%>?_method=DELETE" method="POST">
+                				<input  class="btn btn-danger" type="submit" value="Supprimer">
+                			</form>
+                			
+					</div>	
+			</div>
+		</div>
+	</div>
+
+<<% include ./partials/footer %>

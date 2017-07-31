@@ -1,0 +1,25 @@
+<% include ./partials/header %>
+
+	<div class="container">
+		<h1 style="margin-bottom:25px" class="text-center">Nos coachs pour vos besoins</h1>
+
+		<div class="row" style="display:flex; flex-wrap:wrap">
+			<%  coaches.forEach(function(coach) {%>
+					<div class="col-sm-6 col-md-4">
+						<div  class="thumbnail">
+							<img id="coach-img" class="img-responsive img-circle" src="<%=coach.photo%>">
+							<div class="caption text-center">
+                    			<p><%=coach.nom%></p>
+								<p class="text-justify	"><%=coach.description.substr(0, 150)%> <strong>...</strong></p>
+								<p>
+									<a id="show-btn" href="/coaches/<%=coach._id%>" class="btn btn-xs btn-primary">En savoir plus</a>
+								</p>							
+                			</div>	
+						</div>				
+					</div>
+				<% }) %>
+		</div>
+
+	</div>
+	
+<<% include ./partials/footer %>

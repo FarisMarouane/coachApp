@@ -5,7 +5,10 @@ var mongoose=require("mongoose");
 var passport=require("passport");
 var localStrategy=require("passport-local");
 var passportLocalMongoose=require("passport-local-mongoose");
- var User=require("./models/user");
+var User=require("./models/user");
+var FacebookStrategy = require('passport-facebook').Strategy;
+
+ var configAuth=require("./config/auth");
 
 
 var app=express();
@@ -17,11 +20,28 @@ app.use(require("express-session")({
 	saveUnitialized:false}));
 
 // passport auth stuff
+
+// Local strategy config
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+// Facebook strategy config
+
+passport.use(new FacebookStrategy({
+    clientID: configAuth.facebookAuth.clientID,
+    clientSecret: configAuth.facebookAuth.clientSecret,
+    callbackURL: configAuth.facebookAuth.callbackURL
+  },
+  function(accessToken, refreshToken, profile, done) {
+    User.findOrCreate(..., function(err, user) {
+      if (err) { return done(err); }
+      done(null, user);
+    });
+  }
+));
 
 mongoose.connect("mongodb://localhost/coach_app");
 app.set("view engine", "ejs");
@@ -162,6 +182,11 @@ app.get("/login", function(req, res){
 //      Auth routes
 // =========================
 
+
+// :::::::::::::::::::::::::
+//      Local Strategy
+// :::::::::::::::::::::::::
+
 // Register logic
 
 app.post("/register", function(req, res){
@@ -193,3 +218,21 @@ app.get('/logout', function(req, res){
   req.logout();
   res.redirect('/');
 });
+
+
+// ::::::::::::::::::::::::::::::::
+//          Facebook strategy
+// ::::::::::::::::::::::::::::::::
+
+// Redirect the user to Facebook for authentication.  When complete,
+// Facebook will redirect the user back to the application at
+//     /auth/facebook/callback
+app.get('/auth/facebook', passport.authenticate('facebook'));
+
+// Facebook will redirect the user to this URL after approval.  Finish the
+// authentication process by attempting to obtain an access token.  If
+// access was granted, the user will be logged in.  Otherwise,
+// authentication has failed.
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { successRedirect: '/coaches',
+                                      failureRedirect: '/login' }));

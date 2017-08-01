@@ -5,25 +5,35 @@ var mongoose=require("mongoose");
 var passport=require("passport");
 var localStrategy=require("passport-local");
 var passportLocalMongoose=require("passport-local-mongoose");
+ var User=require("./models/user");
+
 
 var app=express();
 
 // session
-app.use(require("express-session"){
+app.use(require("express-session")({
 	secret:"I am a boss", 
 	resave:false,
 	saveUnitialized:false}));
-})
 
 // passport auth stuff
 app.use(passport.initialize());
 app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 mongoose.connect("mongodb://localhost/coach_app");
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({extended:true}));
+
+// makes sure they are defined on all routes
+app.use(function(req, res, next){
+   res.locals.currentUser=req.user;
+   next();
+});
 
 
 // Schema definition
@@ -136,6 +146,50 @@ app.delete("/coaches/:id", function(req, res){
 })
 
 
+// Register form route
+app.get("/register", function(req, res){
+	res.render("register");
+})
+
+// Login form route
+app.get("/login", function(req, res){
+	res.render("login");
+})
+
+
+
+// =========================
+//      Auth routes
+// =========================
+
+// Register logic
+
+app.post("/register", function(req, res){
+	User.register(new User ({username:req.body.username}), req.body.password, function(err, user){
+		if(err){
+			console.log(err);
+			return res.render("register");
+		} else {
+			passport.authenticate("local")(req, res, function(){
+				res.redirect("/coaches");
+			});
+		}
+	})
+});
+
+// Login logic
+
+app.post("/login", passport.authenticate("local", {
+	successRedirect:"/coaches",
+	failureRedirect:"/login"
+}))
+
 app.listen(8000, function(){
 	console.log("server is up and running");
 })
+
+// Logout logic
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});

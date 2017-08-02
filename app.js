@@ -25,23 +25,52 @@ app.use(require("express-session")({
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new localStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
 
 // Facebook strategy config
 
 passport.use(new FacebookStrategy({
     clientID: configAuth.facebookAuth.clientID,
     clientSecret: configAuth.facebookAuth.clientSecret,
-    callbackURL: configAuth.facebookAuth.callbackURL
+    callbackURL: configAuth.facebookAuth.callbackURL,
+    profileFields: ["emails","name"]
   },
   function(accessToken, refreshToken, profile, done) {
-    User.findOrCreate(..., function(err, user) {
-      if (err) { return done(err); }
-      done(null, user);
-    });
-  }
-));
+    	process.nextTick(function(){
+    		User.findOne({'facebook.id': profile.id}, function(err, user){
+    			if(err)
+    				return done(err);
+    			if(user)
+    				return done(null, user); 
+
+    			else{
+    				var newUser= new User();
+    				newUser.facebook.id=profile.id;
+    				newUser.facebook.token=accessToken;
+    				newUser.facebook.name=profile.name.givenName + " " + profile.name.familyName;    			
+    				newUser.facebook.email=profile.emails[0].value;
+    				
+
+    				newUser.save(function(err){
+    					if(err){
+    						throw err;
+    					} else {
+    						return done(null, newUser);
+    					}
+    				});
+    			}   			
+    		})
+    	})
+    }));
+
 
 mongoose.connect("mongodb://localhost/coach_app");
 app.set("view engine", "ejs");
@@ -62,6 +91,13 @@ var coachSchema= new mongoose.Schema({
 	prenom:String,
 	email:String,
 	description:String,
+	author:{
+         id:{
+             type:mongoose.Schema.Types.ObjectId,
+             ref:"User local"
+         },
+         username:String,
+        },
 	// photo:{ data: Buffer, contentType: String },
 	photo:String,
 	password:String,
@@ -90,7 +126,7 @@ app.get("/coaches", function(req, res){
 })
 
 // new route
-app.get("/coaches/nouveau", function(req, res){
+app.get("/coaches/nouveau", isLoggedIn, function(req, res){
 	res.render("nouveau");
 })
 
@@ -132,14 +168,28 @@ app.get("/coaches/:id", function(req, res){
 // Edit form route
 app.get("/coaches/:id/edit", function(req, res){
 
-	Coach.findById(req.params.id, function(err, foundCoach){
-		if(err){
-			console.log(err);
-		} else {
-			// render edit form
-			res.render("edit", {coach:foundCoach});
-		}
-	})
+	if(req.isAuthenticated()){
+			Coach.findById(req.params.id, function(err, foundCoach){
+				if(err){
+					console.log(err);
+				} else if(foundCoach.author.id == req.user._id.toString()) {
+
+						console.log(foundCoach.author.id);
+						console.log(req.user._id);
+					// render edit form
+					res.render("edit", {coach:foundCoach});
+			} else {
+				res.send("Not authorized");
+				console.log(foundCoach.id);
+						console.log(req.user._id);
+			}
+	     })
+
+	} else {
+				res.redirect("/login");
+	}
+
+	
 });
 
 // Update route
@@ -195,6 +245,8 @@ app.post("/register", function(req, res){
 			console.log(err);
 			return res.render("register");
 		} else {
+			console.log("new user added to db :");
+			console.log(user);
 			passport.authenticate("local")(req, res, function(){
 				res.redirect("/coaches");
 			});
@@ -227,7 +279,7 @@ app.get('/logout', function(req, res){
 // Redirect the user to Facebook for authentication.  When complete,
 // Facebook will redirect the user back to the application at
 //     /auth/facebook/callback
-app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/auth/facebook', passport.authenticate('facebook', {scope:["email"]}));
 
 // Facebook will redirect the user to this URL after approval.  Finish the
 // authentication process by attempting to obtain an access token.  If
@@ -236,3 +288,14 @@ app.get('/auth/facebook', passport.authenticate('facebook'));
 app.get('/auth/facebook/callback',
   passport.authenticate('facebook', { successRedirect: '/coaches',
                                       failureRedirect: '/login' }));
+
+
+// Is logged in function
+
+function isLoggedIn(req, res, next){
+	if(req.isAuthenticated()){
+		return next();
+	} else {
+		res.redirect("/login");
+	}
+}

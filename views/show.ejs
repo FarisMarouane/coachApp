@@ -8,11 +8,14 @@
                     			<p><%=coach.nom%></p>
 								<p class="text-justify	"><%=coach.description%></p>													
                 			</div>	
-                			<a class="btn btn-warning" href="/coaches/<%=coach._id%>/edit">Modifier</a>
 
-                			<form action="/coaches/<%=coach._id%>?_method=DELETE" method="POST">
-                				<input  class="btn btn-danger" type="submit" value="Supprimer">
-                			</form>
+                			
+                				<a class="btn btn-warning" href="/coaches/<%=coach._id%>/edit">Modifier</a>
+
+		                		<form action="/coaches/<%=coach._id%>?_method=DELETE" method="POST">
+		                				<input  class="btn btn-danger" type="submit" value="Supprimer">
+		                		</form>
+                		  
                 			
 					</div>	
 			</div>

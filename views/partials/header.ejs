@@ -14,9 +14,16 @@
             </div>
             <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">    
-                    <li> <a id="signUp" href="/coaches/nouveau">Devenez coach</a></li>                       
-                    <li> <a id="login" href="">Connexion</a></li>
-                    <li> <a id="signUp" href="">Inscription</a></li>                                                     
+                    <li> <a id="signUp" href="/coaches/nouveau">Devenez coach</a></li>              
+
+                    <% if(!currentUser){ %>
+                        <li> <a id="login" href="/login">Connexion</a></li>
+                        <li> <a id="signUp" href="/register">Inscription</a></li> 
+                <% } else{ %>
+                        <li> <a><strong><%=currentUser.username || currentUser.facebook.name %></strong></a></li>
+                        <li> <a href="/logout">Déconnectez-vous</a></li>
+                    <% } %>         
+                                                                        
                     <!-- <li> <a href="/logout">Logout</a></li> -->
             </ul>
          </div>

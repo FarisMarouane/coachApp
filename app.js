@@ -86,25 +86,26 @@ app.use(function(req, res, next){
 
 
 // Schema definition
-var coachSchema= new mongoose.Schema({
+var CoachSchema = new mongoose.Schema({
 	nom:String,
 	prenom:String,
 	email:String,
 	description:String,
 	author:{
-         id:{
-             type:mongoose.Schema.Types.ObjectId,
-             ref:"User local"
-         },
-         username:String,
-        },
+	id:{
+		type:mongoose.Schema.Types.ObjectId,
+		ref:'User'
+	}, 
+
+	username:String
+	},
 	// photo:{ data: Buffer, contentType: String },
 	photo:String,
 	password:String,
 
 })
 
-var Coach=mongoose.model("Coach", coachSchema);
+var Coach=mongoose.model("Coach", CoachSchema);
 
 
 // home route
@@ -138,6 +139,11 @@ app.post("/coaches", function(req, res){
 		prenom:req.body.prenom,
 		email:req.body.email,
 		description:req.body.description,
+		author:{
+
+			id:req.user._id
+
+		},
 		// photo:{ data: Buffer, contentType: String },
 		photo:req.body.photo,
 		password:req.body.password,
@@ -147,7 +153,7 @@ app.post("/coaches", function(req, res){
 			console.log(err);
 		} else {
 			console.log("new coach added to db");
-			console.log(newCoach);
+ 			console.log(newCoach);
 			res.redirect("/coaches");
 		}
 	})	
@@ -205,14 +211,20 @@ app.put("/coaches/:id", function(req, res){
 
 // Delete route
 app.delete("/coaches/:id", function(req, res){
-	Coach.findByIdAndRemove(req.params.id, function(err){
-		if(err){
-			console.log(err);
-		} else {
-			res.redirect("coaches");
-		}
 
-	})
+	if(req.user._id.equals(currentUser.id)){
+		Coach.findByIdAndRemove(req.params.id, function(err){
+			if(err){
+				console.log(err);
+			} else {
+				res.redirect("coaches");
+			}
+
+		})
+	} else {
+		res.send("You are not allowed for this action");
+	}
+	
 })
 
 
@@ -244,6 +256,14 @@ app.post("/register", function(req, res){
 		if(err){
 			console.log(err);
 			return res.render("register");
+		} else if(req.body.password !== req.body.passwordBis){
+			console.log("The 2 passwords aren't the same");
+			console.log(req.body.password);
+			console.log(req.body.passwordBis);
+			res.send("The 2 passwords aren't the same");
+
+		} else if( !/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,12}$/.test(req.body.password) ){
+				res.send("error", "Password must be: from 6 to 12 characters, at least one uppercase character, at least one lowercase character and at least one integer");
 		} else {
 			console.log("new user added to db :");
 			console.log(user);
